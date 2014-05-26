@@ -1,0 +1,31 @@
+{
+  "name": "cartapacio.core.amass",
+  "version": "0.0.1",
+  "description": "collect data from database",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cartapacio/cartapacio.core.amass.git"
+  },
+  "keywords": [
+    "cartapacio"
+  ],
+  "author": "Gabriel Zea <zea@gbrl.in> (http://gbrl.in/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cartapacio/cartapacio.core.amass/issues"
+  },
+  "homepage": "https://github.com/cartapacio/cartapacio.core.amass",
+  "dependencies": {
+    "lodash": "^2.4.1",
+    "nedb": "^0.10.5",
+    "slug": "^0.5.0"
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "mocha": "^1.19.0"
+  }
+}
