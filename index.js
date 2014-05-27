@@ -40,8 +40,22 @@ Data.prototype.buildContent = function(doc) {
     )
 }
 
+/*
+* build a slug base on title, id or fallback to unix epoch
+*/
+Data.prototype.slug = function(doc) {
+  var raw = doc.title || doc._id || _.now()
+  return slug(raw)
+};
+
+
 Data.prototype.buildDocument = function(document) {
-  return _.object(['layout', 'page','document' ], ['default', document.doctype, this.buildContent(document) ])
+  var keys = ['layout', 'page', 'slug', 'document']
+  var pairs = ['default', document.doctype,
+                this.slug(document),
+                this.buildContent(document)]
+
+  return _.object(keys, pairs)
 };
 
 Data.prototype.documents = function(doctype, callback) {
