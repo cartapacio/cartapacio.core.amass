@@ -41,16 +41,25 @@ Data.prototype.buildContent = function(doc) {
 }
 
 Data.prototype.buildDocument = function(document) {
-  return _.object(['document', 'layout', 'page'], [this.buildContent(document), 'default', document.doctype])
+  return _.object(['layout', 'page','document' ], ['default', document.doctype, this.buildContent(document) ])
 };
 
-Data.prototype.documents = function(docs, callback) {
-  var output = []
-  _.each(docs, function (doc){
-    output.push(this.buildDocument(doc))
-  }, this)
-  //console.log(JSON.stringify(this.output, null, 2))
-  callback(output)
+Data.prototype.documents = function(doctype, callback) {
+  var self = this
+
+  this.find(doctype, function (err, docs){
+    if (err){
+      callback(err, null)
+    }
+
+    var output = []
+    _.each(docs, function (doc){
+      output.push(this.buildDocument(doc))
+    }, self)
+    //console.log(JSON.stringify(this.output, null, 2))
+    callback(null, output)
+  })
+
 };
 
 
