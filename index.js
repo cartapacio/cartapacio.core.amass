@@ -21,10 +21,9 @@ function Data (dbPath) {
 
 }
 
-Data.prototype.find = function(schema, callback) {
-  var self = this
-  this.db.find({ doctype: schema.content.doctype }, function (err, docs) {
-    self.build(schema, docs, callback)
+Data.prototype.find = function(doctype, callback) {
+  this.db.find({ doctype: doctype }, function (err, docs) {
+    callback(err,docs)
   });
 }
 
@@ -34,26 +33,24 @@ Data.prototype.find = function(schema, callback) {
 //   })
 // };
 
-Data.prototype.build = function(schema, docs, callback) {
-  var keys = _.keys(schema.content)
+Data.prototype.buildContent = function(doc) {
+  return _.object(_.map(_.pairs(_.omit(doc, 'doctype')), function (pair){
+          return [pair[0], pair[1]]
+        })
+    )
+}
 
+Data.prototype.buildDocument = function(document) {
+  return _.object(['document', 'layout', 'page'], [this.buildContent(document), 'default', document.doctype])
+};
+
+Data.prototype.documents = function(docs, callback) {
+  var output = []
   _.each(docs, function (doc){
-    var out = {
-      layout: schema.layout,
-      page: schema.page,
-      content: {
-        document:{}
-      }
-    }
-    _.each(keys, function (item){
-      out.content.document[item] = doc[item]
-    })
-
-    this.output.documents.push(out)
+    output.push(this.buildDocument(doc))
   }, this)
-
   //console.log(JSON.stringify(this.output, null, 2))
-  callback(this.output)
+  callback(output)
 };
 
 

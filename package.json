@@ -1,6 +1,6 @@
 {
   "name": "cartapacio.core.amass",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "collect data from database",
   "main": "index.js",
   "scripts": {
