@@ -2,7 +2,8 @@
 
 var Datastore = require('nedb'),
   _ = require('lodash'),
-  slug = require('slug')
+  slug = require('slug'),
+  async = require('async')
 
 
 function Data (dbPath) {
@@ -27,12 +28,9 @@ Data.prototype.find = function(doctype, callback) {
   });
 }
 
-// Data.prototype.buildNavigation = function(type) {
-//   this.find(type, function (err, docs){
-//     _.each(docs, )
-//   })
-// };
-
+/*
+* create a new object with the information contained
+*/
 Data.prototype.buildContent = function(doc) {
   return _.object(_.map(_.pairs(_.omit(doc, 'doctype')), function (pair){
           return [pair[0], pair[1]]
@@ -46,33 +44,74 @@ Data.prototype.buildContent = function(doc) {
 Data.prototype.slug = function(doc) {
   var raw = doc.title || doc._id || _.now()
   return slug(raw)
+}
+
+/*
+* Build settings object
+*/
+
+Data.prototype.settings = function(callback) {
+  this.find('settings', function (err, doc){
+    if(err){
+      callback(err, null)
+    }
+    var cleaned = _.omit(_.first(doc),['ftp', '_id', 'doctype'])
+    callback(null, cleaned)
+  })
 };
 
 
-Data.prototype.buildDocument = function(document) {
-  var keys = ['layout', 'page', 'slug', 'document']
+Data.prototype.buildDocument = function(document, settings) {
+  var keys = ['layout', 'page', 'slug', 'assets', 'settings', 'document']
   var pairs = ['default', document.doctype,
                 this.slug(document),
+                '/assets',
+                settings,
                 this.buildContent(document)]
 
   return _.object(keys, pairs)
 };
 
 Data.prototype.documents = function(doctype, callback) {
-  var self = this
+  var self = this,
+    settings = null
 
-  this.find(doctype, function (err, docs){
-    if (err){
-      callback(err, null)
-    }
-
-    var output = []
-    _.each(docs, function (doc){
-      output.push(this.buildDocument(doc))
-    }, self)
-    //console.log(JSON.stringify(this.output, null, 2))
-    callback(null, output)
-  })
+  async.waterfall([
+      function (next){
+        console.info('settings')
+        self.settings(function (err, doc){
+          if(err){
+            next(err)
+          }
+          settings = doc
+          next(null)
+        })
+      },
+      function (next){
+        console.info('documents')
+        self.find(doctype, function (err, docs){
+          if (err){
+            next(err, null)
+          }
+          next(null, docs)
+        })
+      },
+      function (docs, next){
+        console.info('assemble')
+        var output = []
+        _.each(docs, function (doc){
+          output.push(this.buildDocument(doc, settings))
+        }, self)
+        //console.log(JSON.stringify(this.output, null, 2))
+        next(null, output)
+      }
+    ], function (err, output){
+        if(err){
+          throw new Error('building documents: ' + err)
+        }
+        callback(null, output)
+        console.info('documents done');
+    })
 
 };
 
