@@ -6,8 +6,8 @@ var Datastore = require('nedb'),
   async = require('async')
 
 
-function Data (dbPath) {
-  this.db = new Datastore({ filename: dbPath, autoload: true })
+function Data (dbInstance) {
+  this.db = dbInstance
 
   this.output = {
     site: {
