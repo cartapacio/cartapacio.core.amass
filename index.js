@@ -23,7 +23,14 @@ function Data (dbPath) {
 }
 
 Data.prototype.find = function(doctype, callback) {
-  this.db.find({ doctype: doctype }, function (err, docs) {
+  var filter = null
+
+  if(doctype === '*'){
+    filter = {}
+  } else {
+    filter = {doctype: doctype}
+  }
+  this.db.find(filter, function (err, docs) {
     callback(err,docs)
   });
 }
